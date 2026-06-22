@@ -13,6 +13,7 @@ import type { Spine, AppendInput } from "../spine/spine.js";
 import type { AppendReceipt, MemoryObject, VaultDid } from "../spine/types.js";
 import type { AnchorReceipt } from "../adapters/anchor.js";
 import type { CapabilityGrant } from "./capability.js";
+import { verifyGrant, grantAuthorizes } from "./capability.js";
 
 /**
  * A `Spine`-shaped facade whose `append` requires a `CapabilityGrant`. Throws on an unauthorized
@@ -30,9 +31,45 @@ export interface AuthorizingSpine {
  * Wrap a `Spine` with capability enforcement. `authorityPublicKey` is the raw 32-byte Vault
  * authority key that issued grants are verified against. The wrapped spine is used unchanged.
  */
-export function createAuthorizingSpine(_deps: {
+export function createAuthorizingSpine(deps: {
   spine: Spine;
   authorityPublicKey: Uint8Array;
 }): AuthorizingSpine {
-  throw new Error("[TODO_L4] createAuthorizingSpine not implemented");
+  const { spine, authorityPublicKey } = deps;
+
+  return {
+    async append(input: AppendInput, grant: CapabilityGrant): Promise<AppendReceipt> {
+      // 1. Verify grant authenticity.
+      if (!verifyGrant(grant, authorityPublicKey)) {
+        throw new Error("[COLLECTIVE_BAD_GRANT] grant not authentic for the configured authority");
+      }
+      // 2. Scope check.
+      if (
+        !grantAuthorizes(grant, {
+          vaultDid: input.vaultDid,
+          space: input.space,
+          action: "append",
+          writerDid: input.writerDid,
+        })
+      ) {
+        throw new Error("[COLLECTIVE_UNAUTHORIZED] grant does not authorize this write");
+      }
+      // 3. Capability id match: the object committed must reference this grant.
+      if (input.capabilityId !== grant.capability_id) {
+        throw new Error(
+          `[COLLECTIVE_CAPABILITY_MISMATCH] input.capabilityId ${input.capabilityId} does not match grant ${grant.capability_id}`,
+        );
+      }
+      // 4. Delegate to the UNMODIFIED L0 spine.
+      return spine.append(input);
+    },
+
+    recallById(vaultDid: VaultDid, objectId: string) {
+      return spine.recallById(vaultDid, objectId);
+    },
+
+    checkpoint(vaultDid: VaultDid) {
+      return spine.checkpoint(vaultDid);
+    },
+  };
 }

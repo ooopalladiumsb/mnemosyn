@@ -12,12 +12,14 @@ import { runScenario } from "./spine-scenario.js";
 import { runAnchorScenario } from "./anchor-scenario.js";
 import { runRecallScenario } from "./recall-scenario.js";
 import { runSemanticScenario } from "./semantic-scenario.js";
+import { runCollectiveScenario } from "./collective-scenario.js";
 
 const BASE = join(dirname(fileURLToPath(import.meta.url)), "..", "vectors");
 const SPINE_OUT = join(BASE, "spine", "golden.json");
 const ANCHOR_OUT = join(BASE, "anchor", "golden.json");
 const RECALL_OUT = join(BASE, "recall", "golden.json");
 const SEMANTIC_OUT = join(BASE, "semantic", "golden.json");
+const COLLECTIVE_OUT = join(BASE, "collective", "golden.json");
 
 export async function generate(): Promise<string[]> {
   const outputs: string[] = [];
@@ -101,6 +103,26 @@ export async function generate(): Promise<string[]> {
   await mkdir(dirname(SEMANTIC_OUT), { recursive: true });
   await writeFile(SEMANTIC_OUT, semanticJson);
   outputs.push(SEMANTIC_OUT);
+
+  // Collective (L4)
+  const collectiveResult = await runCollectiveScenario();
+  const collectiveDoc = {
+    _status: "PRE-NORMATIVE",
+    meta: {
+      package: "@mnemosyne/spine",
+      spec_basis:
+        "Mnemosyne L4 Collective v0.1-draft (docs/spec/l4-collective-v0.1-draft.md), D8",
+      description:
+        "Deterministic collective golden: fixed authority seed + fixed capabilities → " +
+        "pinned capability_id and proof. Proves capability hashing + Ed25519 reproducibility. " +
+        "Regenerate with `npm run vectors:generate`.",
+    },
+    scenario: collectiveResult,
+  };
+  const collectiveJson = JSON.stringify(collectiveDoc, null, 2) + "\n";
+  await mkdir(dirname(COLLECTIVE_OUT), { recursive: true });
+  await writeFile(COLLECTIVE_OUT, collectiveJson);
+  outputs.push(COLLECTIVE_OUT);
 
   return outputs;
 }

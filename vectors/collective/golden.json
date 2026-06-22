@@ -1,0 +1,38 @@
+{
+  "_status": "PRE-NORMATIVE",
+  "meta": {
+    "package": "@mnemosyne/spine",
+    "spec_basis": "Mnemosyne L4 Collective v0.1-draft (docs/spec/l4-collective-v0.1-draft.md), D8",
+    "description": "Deterministic collective golden: fixed authority seed + fixed capabilities → pinned capability_id and proof. Proves capability hashing + Ed25519 reproducibility. Regenerate with `npm run vectors:generate`."
+  },
+  "scenario": {
+    "authority_seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "authority_pubkey_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+    "vault_did": "memory://vault/aoqqpp7tzyil4hlq3umoos6atft6jvrqtosq2xy53sdgiesvgg4a",
+    "capabilities": [
+      {
+        "grantee": "agent:claude:alice",
+        "spaces": [
+          "dialog",
+          "code"
+        ],
+        "capability_id": "b68baab0122b66ba770f2806b74f0d7c374f8966c39a074346037c0b21b0256d",
+        "proof": "73d1eff6cd8419f12edc340361e0abda995e15755222e2d9dcb254e0ca8a3c14b2450803a213649e7e6cdb3e60fba644ffdae526361d37f3e72d81362b513504"
+      },
+      {
+        "grantee": "agent:claude:bob",
+        "spaces": [
+          "code"
+        ],
+        "capability_id": "d2de87857a5ddb418c979f2787cec1cf4fd6231744f919fffb1c3de222ad2e1e",
+        "proof": "a96ad3f44af14778955fae9adde6ba31d7738f4ca97d1c50c0dc20ab5c89b591190150c789c9d747a7d8cbcf550c5660ed7490452660ffc30de9af2fad68040e"
+      },
+      {
+        "grantee": "agent:gpt:carol",
+        "spaces": "*",
+        "capability_id": "a420a57c1c42a175ac931e69df5ab2b19f00c9418c9c746abf975cf480b64599",
+        "proof": "33935eefcfd8951c50e63e887087ea3b7880d99c6859ced9dcec7eb5ecbbf2a61d69e03cf0625f697b7097dbd2e6049ba9a075e1cfe95846bb291f4b786be508"
+      }
+    ]
+  }
+}
