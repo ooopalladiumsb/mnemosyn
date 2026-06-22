@@ -1,0 +1,43 @@
+{
+  "_status": "PRE-NORMATIVE",
+  "meta": {
+    "package": "@mnemosyne/spine",
+    "spec_basis": "Mnemosyne L1 Anchor v0.1-draft (docs/spec/l1-anchor-v0.1-draft.md), D5",
+    "description": "Deterministic anchor golden: fixed seed + fixed root sequence → 3-link checkpoint chain. Asserts each checkpoint_id, proof, and head. Proves chain hashing + Ed25519 reproducibility. Regenerate with `npm run vectors:generate`."
+  },
+  "scenario": {
+    "authority_seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "authority_pubkey_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+    "vault_did": "memory://vault/aoqqpp7tzyil4hlq3umoos6atft6jvrqtosq2xy53sdgiesvgg4a",
+    "chain": [
+      {
+        "version": "0",
+        "root": "aa000000000000000000000000000000000000000000000000000000000000bb",
+        "prev": "0000000000000000000000000000000000000000000000000000000000000000",
+        "checkpoint_id": "a3025eb272a500073196afeab0008c54e2d6b6aa4060673856240d8d4b9e16aa",
+        "proof": "341b2d4b0c1908412f86258e24063a633000effc3166621802824a06ab1b79dd02b15d110aac1cf72dadc5569dc6214a2cbf9a0f57c7dbaa93c21fc64a3b430c"
+      },
+      {
+        "version": "1",
+        "root": "aa010000000000000000000000000000000000000000000000000000000000bb",
+        "prev": "a3025eb272a500073196afeab0008c54e2d6b6aa4060673856240d8d4b9e16aa",
+        "checkpoint_id": "3e65fbd93f697ffc2fea38184e53ff8ddc07c68494e05388cd7b21216cde7ae0",
+        "proof": "d142870a939393fb2877583e4c96a8ec83dcb0eca15d5f4f188e44f7be2fd293cba18b439e171d1d0f1663c5f2cbd08bb453d42719efb2e7fcf94ee04039db0f"
+      },
+      {
+        "version": "2",
+        "root": "aa020000000000000000000000000000000000000000000000000000000000bb",
+        "prev": "3e65fbd93f697ffc2fea38184e53ff8ddc07c68494e05388cd7b21216cde7ae0",
+        "checkpoint_id": "77970b4e2582df436357fcf183dd532c3277ac46937c3ed5e92edddfb8cf33f0",
+        "proof": "bf8601d3d62958d4871a43009368efa786d3af3dcc89c9f0fc579b5ec29043a01da69621fad1cd76c3b066f636fd09628a2c8a80110a94b91bca94958ab1dd04"
+      }
+    ],
+    "head": {
+      "checkpointId": "77970b4e2582df436357fcf183dd532c3277ac46937c3ed5e92edddfb8cf33f0",
+      "version": "2"
+    },
+    "chain_verification": {
+      "ok": true
+    }
+  }
+}
