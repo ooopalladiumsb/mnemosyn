@@ -1,0 +1,74 @@
+{
+  "_status": "PRE-NORMATIVE",
+  "meta": {
+    "package": "@mnemosyne/spine",
+    "spec_basis": "Mnemosyne L0 Spine v0.1-draft (docs/spec/l0-spine-v0.1-draft.md)",
+    "description": "Deterministic spine golden: one vault, spaces dialog+code, 3 interleaved appends each, fixed ciphertext (not live-encrypted), non-monotonic created_at (AI-7). Asserts object_id, space_state and vault_memory_root. Regenerate with `npm run vectors:generate`."
+  },
+  "scenario": {
+    "vault_did": "memory://vault/aaaqeayeaudaocajbifqydiob4ibceqtcqkrmfyydenbwha5dypq",
+    "writer_did": "agent:claude:golden",
+    "capability_id": "cap:root",
+    "appends": [
+      {
+        "step": 0,
+        "space": "dialog",
+        "kind": "dialog",
+        "object_id": "75bf34ece7b3ef2d6139a05a96a45e11c1a7719366c22666343cf01f061bcd01",
+        "seqno": "0",
+        "space_state": "09c2bf142281f649b0449ea55bb55d33ecb671b8432ef400cfc144d3a8a38b8f",
+        "vault_memory_root": "826cb60bc4fc9d1dfd6627bbed382083c3b29952123b1422ad241ba5a66ed270"
+      },
+      {
+        "step": 1,
+        "space": "code",
+        "kind": "code",
+        "object_id": "053d901cc868c2a8811184de661349f80836396f9227c41a059d1ba046a454bc",
+        "seqno": "0",
+        "space_state": "0c08bdb85fa043143508c0f40c2162ed6b00d01f8b81b9b2ec402cbda24065fe",
+        "vault_memory_root": "7147dfc705343e87a61a113de19bccf64f316560918055f5b40fdcb4813d9f25"
+      },
+      {
+        "step": 2,
+        "space": "dialog",
+        "kind": "dialog",
+        "object_id": "1083c50bf9e98b385d8d6252f3a3506c872ec0ccc4731c4859e35e2debdf6f19",
+        "seqno": "1",
+        "space_state": "bfa4eb8f8c795db20c2af34f7f53145ebd56d0540d3b70b30332c9a883a61528",
+        "vault_memory_root": "1df1d13f462dd026a8bafaeaf0679e57fa75d699fd28693f62c442579f463d4d"
+      },
+      {
+        "step": 3,
+        "space": "code",
+        "kind": "code",
+        "object_id": "e86d4873c8b219933b5f1a5fe4e455fe165c694a3512a6fbc0d2d0ff1bab912e",
+        "seqno": "1",
+        "space_state": "3246053c25e43aff5fcfafe60879e5bbd56fef3af836442d7776634b9e0de52a",
+        "vault_memory_root": "4ba25efa13be7fd0c46ea3d932745b67edf40e4220c572287c708364aae8836d"
+      },
+      {
+        "step": 4,
+        "space": "dialog",
+        "kind": "fact",
+        "object_id": "ef96d917ff76333688acd6377ec571fbc5e87d30e57f99da38db54c90ea6becb",
+        "seqno": "2",
+        "space_state": "84033d19a43b625c65ea302f9442e770752a381a103dba92350058a7d56d7e0e",
+        "vault_memory_root": "80545ce4678e01146d28fd5e155ac2884fda7cf1b771784570f2767e2ad06b97"
+      },
+      {
+        "step": 5,
+        "space": "code",
+        "kind": "artifact",
+        "object_id": "d271f4b8a57af1efe1b088dcc63a8afadf534b684f4d2d0d7855999418e1f733",
+        "seqno": "2",
+        "space_state": "c65c5a3b212750a0b820d212e7351c553ebf3e57b9609113d38e0ce24eb8ee36",
+        "vault_memory_root": "36e56378996fdce46735571d866a779cd0283ad3c5a697a389652e6265b39edf"
+      }
+    ],
+    "final_space_state": {
+      "code": "c65c5a3b212750a0b820d212e7351c553ebf3e57b9609113d38e0ce24eb8ee36",
+      "dialog": "84033d19a43b625c65ea302f9442e770752a381a103dba92350058a7d56d7e0e"
+    },
+    "final_vault_memory_root": "36e56378996fdce46735571d866a779cd0283ad3c5a697a389652e6265b39edf"
+  }
+}

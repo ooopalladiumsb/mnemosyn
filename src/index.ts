@@ -1,0 +1,15 @@
+/**
+ * @mnemosyne/spine — Mnemosyne L0 deterministic memory spine.
+ *
+ * Public surface:
+ *   - canonical: vendored CE v1.3 primitives (hash, integers, strings, jcs, merkle, domains)
+ *   - spine:     MemoryObject / MemorySpace / vault root / Spine protocol
+ *   - identity:  Vault DID / Agent DID / capability
+ *   - crypto:    AES-256-GCM, content commitment (ciphertext) vs content identity (plaintext)
+ *   - adapters:  StorageAdapter (LocalCAS) · AnchorAdapter (LocalSigned) · LLMProvider seam
+ */
+export * as canonical from "./canonical/index.js";
+export * from "./spine/index.js";
+export * from "./identity/did.js";
+export * from "./crypto/encryption.js";
+export * from "./adapters/index.js";
