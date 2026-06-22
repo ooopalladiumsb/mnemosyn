@@ -37,32 +37,87 @@ export interface RecallIndex {
 /** In-memory brute-force cosine reference index. Deterministic; correctness over speed. */
 export class LocalRecallIndex implements RecallIndex {
   readonly dimension: number;
+  private readonly store = new Map<string, Embedding>();
 
   constructor(dimension: number) {
     this.dimension = dimension;
   }
 
-  add(_objectId: string, _vector: Embedding): void {
-    throw new Error("[TODO_L2] LocalRecallIndex.add not implemented");
+  add(objectId: string, vector: Embedding): void {
+    if (vector.length !== this.dimension) {
+      throw new Error(
+        `[RECALL_DIM_MISMATCH] expected dimension ${this.dimension}, got ${vector.length}`,
+      );
+    }
+    this.store.set(objectId, vector);
   }
 
-  remove(_objectId: string): void {
-    throw new Error("[TODO_L2] LocalRecallIndex.remove not implemented");
+  remove(objectId: string): void {
+    this.store.delete(objectId);
   }
 
-  has(_objectId: string): boolean {
-    throw new Error("[TODO_L2] LocalRecallIndex.has not implemented");
+  has(objectId: string): boolean {
+    return this.store.has(objectId);
   }
 
   size(): number {
-    throw new Error("[TODO_L2] LocalRecallIndex.size not implemented");
+    return this.store.size;
   }
 
-  query(_vector: Embedding, _k: number): readonly ScoredHit[] {
-    throw new Error("[TODO_L2] LocalRecallIndex.query not implemented");
+  /** Top-k by cosine similarity, deterministic tie-break (score desc, then objectId asc). */
+  query(vector: Embedding, k: number): readonly ScoredHit[] {
+    if (vector.length !== this.dimension) {
+      throw new Error(
+        `[RECALL_DIM_MISMATCH] expected dimension ${this.dimension}, got ${vector.length}`,
+      );
+    }
+    if (k <= 0) return [];
+
+    // Precompute query norm.
+    let queryNormSq = 0;
+    for (let i = 0; i < this.dimension; i++) {
+      queryNormSq += vector[i]! * vector[i]!;
+    }
+    const queryNorm = Math.sqrt(queryNormSq);
+
+    const hits: ScoredHit[] = [];
+    for (const [objectId, stored] of this.store) {
+      // Dot product.
+      let dot = 0;
+      for (let i = 0; i < this.dimension; i++) {
+        dot += vector[i]! * stored[i]!;
+      }
+
+      // Cosine: store norm.
+      let storeNormSq = 0;
+      for (let i = 0; i < this.dimension; i++) {
+        storeNormSq += stored[i]! * stored[i]!;
+      }
+      const storeNorm = Math.sqrt(storeNormSq);
+
+      let score: number;
+      if (queryNorm === 0 || storeNorm === 0) {
+        score = 0;
+      } else {
+        score = dot / (queryNorm * storeNorm);
+      }
+      hits.push({ objectId, score });
+    }
+
+    // Sort: score desc, then objectId asc (deterministic tie-break).
+    hits.sort((a, b) => {
+      if (a.score !== b.score) return b.score - a.score;
+      // objectId ascending (string byte-order comparison)
+      if (a.objectId < b.objectId) return -1;
+      if (a.objectId > b.objectId) return 1;
+      return 0;
+    });
+
+    const limit = k < hits.length ? k : hits.length;
+    return hits.slice(0, limit);
   }
 
   clear(): void {
-    throw new Error("[TODO_L2] LocalRecallIndex.clear not implemented");
+    this.store.clear();
   }
 }

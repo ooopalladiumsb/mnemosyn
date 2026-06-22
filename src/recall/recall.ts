@@ -33,9 +33,52 @@ export interface Recall {
 }
 
 /** Construct a Recall facade over a provider + index. Their `dimension`s MUST match. */
-export function createRecall(_deps: {
+export function createRecall(deps: {
   embedder: EmbeddingProvider;
   index: RecallIndex;
 }): Recall {
-  throw new Error("[TODO_L2] createRecall not implemented");
+  if (deps.embedder.dimension !== deps.index.dimension) {
+    throw new Error(
+      `[RECALL_DIM_MISMATCH] embedder dimension ${deps.embedder.dimension} ≠ index dimension ${deps.index.dimension}`,
+    );
+  }
+
+  const { embedder, index } = deps;
+
+  /** Resolve a RecallSource to an Embedding. If `{text}`, embed it; if `{vector}`, use it. */
+  async function resolve(source: RecallSource): Promise<Embedding> {
+    if ("text" in source) {
+      return embedder.embed(source.text);
+    }
+    return source.vector;
+  }
+
+  return {
+    async indexObject(objectId: string, source: RecallSource): Promise<void> {
+      const vec = await resolve(source);
+      index.add(objectId, vec);
+    },
+
+    async recall(query: RecallSource, k: number): Promise<readonly RecallHit[]> {
+      const vec = await resolve(query);
+      return index.query(vec, k).map((h) => ({ objectId: h.objectId, score: h.score }));
+    },
+
+    async rebuild(
+      objects: AsyncIterable<{ objectId: string; text: string }>,
+    ): Promise<number> {
+      index.clear();
+      let count = 0;
+      for await (const { objectId, text } of objects) {
+        const vec = await embedder.embed(text);
+        index.add(objectId, vec);
+        count++;
+      }
+      return count;
+    },
+
+    remove(objectId: string): void {
+      index.remove(objectId);
+    },
+  };
 }

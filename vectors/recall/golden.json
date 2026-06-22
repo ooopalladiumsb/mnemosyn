@@ -1,0 +1,337 @@
+{
+  "_status": "PRE-NORMATIVE",
+  "meta": {
+    "package": "@mnemosyne/spine",
+    "spec_basis": "Mnemosyne L2 Recall v0.1-draft (docs/spec/l2-recall-v0.1-draft.md), D6",
+    "description": "Deterministic recall golden: fixed HashEmbedder (dim=16), fixed corpus of {objectId, text}, fixed queries. Asserts ranked objectId order EXACTLY and scores within 1e-12 tolerance. Pins cosine + top-k + tie-break mechanics (NOT semantics). Regenerate with `npm run vectors:generate`."
+  },
+  "scenario": {
+    "embedder_name": "hash-embedder-v1",
+    "embedder_dimension": 16,
+    "embedder": {
+      "spec": "hash-embedder-v1: SHA-256 counter-expansion to big-endian float32, L2-normalize"
+    },
+    "corpus": [
+      {
+        "objectId": "obj:alpha",
+        "text": "The quick brown fox jumps over the lazy dog",
+        "vector": [
+          -6.622976393091631e-23,
+          0,
+          5.456805146630828e-12,
+          0,
+          0,
+          6.510782468716059e-10,
+          0,
+          4.289374599298265e-42,
+          -1,
+          0,
+          0,
+          -1.4358627134503088e-12,
+          -1.2302785290694117e-36,
+          2.833519226544401e-12,
+          0,
+          -2.4034650870559965e-40
+        ]
+      },
+      {
+        "objectId": "obj:beta",
+        "text": "Pack my box with five dozen liquor jugs",
+        "vector": [
+          -1.469771512485585e-39,
+          0,
+          0,
+          -5.661968374775188e-31,
+          0,
+          0,
+          -1,
+          -5.216372318057886e-25,
+          7.026386616458198e-35,
+          -7.648170104802114e-20,
+          0,
+          5.605193857299268e-45,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "objectId": "obj:gamma",
+        "text": "How vexingly quick daft zebras jump",
+        "vector": [
+          5.4510510262235384e-43,
+          6.094891618642219e-40,
+          1,
+          -2.0707079153140878e-35,
+          -2.421533873214147e-14,
+          0,
+          0,
+          1.711487060874178e-23,
+          1.8231599151423025e-29,
+          9.80908925027372e-45,
+          0,
+          -1.5544895058979342e-19,
+          6.10691936611415e-25,
+          0,
+          0,
+          6.778879541036176e-12
+        ]
+      },
+      {
+        "objectId": "obj:delta",
+        "text": "The five boxing wizards jump quickly",
+        "vector": [
+          1.8060820048425008e-25,
+          -0.00001592862099641934,
+          0,
+          1.6753653301478797e-31,
+          1,
+          -1.9347202214541136e-24,
+          5.938719711766682e-30,
+          -3.370239968316831e-26,
+          0,
+          -5.254869241218064e-43,
+          0,
+          6.661627371737068e-29,
+          2.8898392468064416e-15,
+          0,
+          0,
+          1.5691283716521563e-36
+        ]
+      },
+      {
+        "objectId": "obj:epsilon",
+        "text": "Sphinx of black quartz, judge my vow",
+        "vector": [
+          0.9600603580474854,
+          0,
+          -1.6773454370247465e-12,
+          0,
+          0,
+          0,
+          1.0527737561314625e-15,
+          -1.6872831043624421e-22,
+          0,
+          -2.9693514459042874e-42,
+          -5.600585950560344e-7,
+          8.227224839174596e-7,
+          1.0004866743856655e-35,
+          0,
+          -0.000002637147872519563,
+          -0.2797929644584656
+        ]
+      },
+      {
+        "objectId": "obj:zeta",
+        "text": "Two driven jocks help fax my big quiz",
+        "vector": [
+          0.06888447701931,
+          -0.9976245164871216,
+          0,
+          2.3900798569436353e-18,
+          0,
+          0,
+          0,
+          -1.875751758093007e-30,
+          -7.805933095521393e-41,
+          5.305081085987909e-18,
+          0,
+          1.0357123066686512e-39,
+          -7.391053326041375e-16,
+          -6.200870604711408e-21,
+          -0.0004844017094001174,
+          1.1453107975798745e-22
+        ]
+      },
+      {
+        "objectId": "obj:eta",
+        "text": "Waltz, bad nymph, for quick jigs vex",
+        "vector": [
+          0,
+          0,
+          -0.2177666425704956,
+          -1.78019415479514e-39,
+          2.0276057137015837e-23,
+          0,
+          -6.0862154511743825e-37,
+          1.0368115255232624e-9,
+          9.861084171447487e-12,
+          -1.7296132306530296e-24,
+          0,
+          0.9760008454322815,
+          -2.0630032241970159e-13,
+          8.329656781761851e-15,
+          -1.5560943004849223e-37,
+          0
+        ]
+      },
+      {
+        "objectId": "obj:theta",
+        "text": "the quick brown fox jumps over the lazy dog",
+        "vector": [
+          0,
+          0,
+          0,
+          0,
+          -3.756678366313964e-34,
+          -4.9654904400284503e-17,
+          0,
+          -1.3404326473667696e-24,
+          -5.605193857299268e-45,
+          0,
+          -8.236687292504166e-15,
+          0.5215624570846558,
+          0,
+          0,
+          -0.8532131314277649,
+          -1.5769095488486588e-14
+        ]
+      }
+    ],
+    "queries": [
+      {
+        "query": "quick brown fox",
+        "k": 3,
+        "hits": [
+          {
+            "objectId": "obj:eta",
+            "score": 4.998522980249367e-7
+          },
+          {
+            "objectId": "obj:theta",
+            "score": 1.3460353116534628e-15
+          },
+          {
+            "objectId": "obj:epsilon",
+            "score": 3.777537095709042e-18
+          }
+        ]
+      },
+      {
+        "query": "lazy dog",
+        "k": 2,
+        "hits": [
+          {
+            "objectId": "obj:zeta",
+            "score": 6.200870660729298e-21
+          },
+          {
+            "objectId": "obj:beta",
+            "score": -2.739460880014428e-35
+          }
+        ]
+      },
+      {
+        "query": "vexing zebras",
+        "k": 5,
+        "hits": [
+          {
+            "objectId": "obj:delta",
+            "score": 0.9996261843292922
+          },
+          {
+            "objectId": "obj:epsilon",
+            "score": 0.026248326786305703
+          },
+          {
+            "objectId": "obj:zeta",
+            "score": 0.0018833218577051646
+          },
+          {
+            "objectId": "obj:theta",
+            "score": 7.021342640309909e-7
+          },
+          {
+            "objectId": "obj:eta",
+            "score": 2.0268478029649844e-23
+          }
+        ]
+      },
+      {
+        "query": "boxing wizards",
+        "k": 1,
+        "hits": [
+          {
+            "objectId": "obj:theta",
+            "score": 0.0005533529610127481
+          }
+        ]
+      },
+      {
+        "query": "completely unrelated phrase about spaceships",
+        "k": 3,
+        "hits": [
+          {
+            "objectId": "obj:delta",
+            "score": 8.780225413997937e-11
+          },
+          {
+            "objectId": "obj:gamma",
+            "score": 2.8749378812826126e-15
+          },
+          {
+            "objectId": "obj:beta",
+            "score": 5.571569730936849e-31
+          }
+        ]
+      },
+      {
+        "query": "the quick brown fox jumps over the lazy dog",
+        "k": 3,
+        "hits": [
+          {
+            "objectId": "obj:theta",
+            "score": 1
+          },
+          {
+            "objectId": "obj:eta",
+            "score": 0.5090453977414487
+          },
+          {
+            "objectId": "obj:zeta",
+            "score": 0.00041329789397411633
+          }
+        ]
+      },
+      {
+        "query": "quick fox",
+        "k": 10,
+        "hits": [
+          {
+            "objectId": "obj:beta",
+            "score": 0.23132167278475305
+          },
+          {
+            "objectId": "obj:theta",
+            "score": 1.9353577566658687e-20
+          },
+          {
+            "objectId": "obj:eta",
+            "score": 1.4078733341031565e-37
+          },
+          {
+            "objectId": "obj:gamma",
+            "score": -5.3032034988376595e-43
+          },
+          {
+            "objectId": "obj:delta",
+            "score": -1.7495676235480513e-25
+          },
+          {
+            "objectId": "obj:alpha",
+            "score": -2.538124273014238e-13
+          },
+          {
+            "objectId": "obj:zeta",
+            "score": -0.06701614076382063
+          },
+          {
+            "objectId": "obj:epsilon",
+            "score": -0.9340208779030109
+          }
+        ]
+      }
+    ]
+  }
+}
