@@ -7,9 +7,11 @@
  *   - identity:  Vault DID / Agent DID / capability
  *   - crypto:    AES-256-GCM, content commitment (ciphertext) vs content identity (plaintext)
  *   - adapters:  StorageAdapter (LocalCAS) · AnchorAdapter (LocalSigned) · LLMProvider seam
+ *   - recall:    L2 derived semantic recall (EmbeddingProvider · RecallIndex · Recall) — out-of-root
  */
 export * as canonical from "./canonical/index.js";
 export * from "./spine/index.js";
 export * from "./identity/did.js";
 export * from "./crypto/encryption.js";
 export * from "./adapters/index.js";
+export * as recall from "./recall/index.js";
