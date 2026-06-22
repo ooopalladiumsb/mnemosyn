@@ -15,7 +15,7 @@ const GOLDEN = join(__dirname, "..", "vectors", "spine", "golden.json");
 
 test("spine golden reproduces the committed vector", async () => {
   const committed = JSON.parse(readFileSync(GOLDEN, "utf8"));
-  assert.equal(committed._status, "PRE-NORMATIVE");
+  assert.equal(committed._status, "NORMATIVE");
   const live = await runScenario();
   assert.deepEqual(live, committed.scenario);
 });

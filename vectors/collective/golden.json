@@ -1,5 +1,5 @@
 {
-  "_status": "PRE-NORMATIVE",
+  "_status": "NORMATIVE",
   "meta": {
     "package": "@mnemosyne/spine",
     "spec_basis": "Mnemosyne L4 Collective v0.1-draft (docs/spec/l4-collective-v0.1-draft.md), D8",

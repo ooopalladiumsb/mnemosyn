@@ -19,7 +19,7 @@ const FLOAT_TOLERANCE = 1e-12;
 
 test("recall golden reproduces the committed vector", async () => {
   const committed = JSON.parse(readFileSync(GOLDEN, "utf8"));
-  assert.equal(committed._status, "PRE-NORMATIVE");
+  assert.equal(committed._status, "NORMATIVE");
   const live = await runRecallScenario();
 
   assert.equal(live.embedder_dimension, committed.scenario.embedder_dimension);

@@ -1,5 +1,5 @@
 {
-  "_status": "PRE-NORMATIVE",
+  "_status": "NORMATIVE",
   "meta": {
     "package": "@mnemosyne/spine",
     "spec_basis": "Mnemosyne L2 Recall v0.1-draft (docs/spec/l2-recall-v0.1-draft.md), D6",

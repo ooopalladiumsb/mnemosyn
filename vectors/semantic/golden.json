@@ -1,5 +1,5 @@
 {
-  "_status": "PRE-NORMATIVE",
+  "_status": "NORMATIVE",
   "meta": {
     "package": "@mnemosyne/spine",
     "spec_basis": "Mnemosyne L3 Semantic v0.1-draft (docs/spec/l3-semantic-v0.1-draft.md), D7",

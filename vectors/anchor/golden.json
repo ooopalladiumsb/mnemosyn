@@ -1,5 +1,5 @@
 {
-  "_status": "PRE-NORMATIVE",
+  "_status": "NORMATIVE",
   "meta": {
     "package": "@mnemosyne/spine",
     "spec_basis": "Mnemosyne L1 Anchor v0.1-draft (docs/spec/l1-anchor-v0.1-draft.md), D5",

@@ -1,7 +1,7 @@
 /**
  * (Re)generate the PRE-NORMATIVE spine + anchor + recall + semantic golden vectors
  * (TASK §T8.3 + L1 §2.1 + L2 §2.1 + L3 §2.1). Deterministic: re-running this produces
- * byte-identical files. The architect promotes "_status" PRE-NORMATIVE → NORMATIVE.
+ * byte-identical files. Promoted to NORMATIVE at v1.0.0.
  *
  *   npm run vectors:generate
  */
@@ -27,7 +27,7 @@ export async function generate(): Promise<string[]> {
   // Spine (L0)
   const spineResult = await runScenario();
   const spineDoc = {
-    _status: "PRE-NORMATIVE",
+    _status: "NORMATIVE",
     meta: {
       package: "@mnemosyne/spine",
       spec_basis: "Mnemosyne L0 Spine v0.1-draft (docs/spec/l0-spine-v0.1-draft.md)",
@@ -46,7 +46,7 @@ export async function generate(): Promise<string[]> {
   // Anchor (L1)
   const anchorResult = await runAnchorScenario();
   const anchorDoc = {
-    _status: "PRE-NORMATIVE",
+    _status: "NORMATIVE",
     meta: {
       package: "@mnemosyne/spine",
       spec_basis:
@@ -66,7 +66,7 @@ export async function generate(): Promise<string[]> {
   // Recall (L2)
   const recallResult = await runRecallScenario();
   const recallDoc = {
-    _status: "PRE-NORMATIVE",
+    _status: "NORMATIVE",
     meta: {
       package: "@mnemosyne/spine",
       spec_basis:
@@ -86,7 +86,7 @@ export async function generate(): Promise<string[]> {
   // Semantic (L3)
   const semanticResult = await runSemanticScenario();
   const semanticDoc = {
-    _status: "PRE-NORMATIVE",
+    _status: "NORMATIVE",
     meta: {
       package: "@mnemosyne/spine",
       spec_basis:
@@ -107,7 +107,7 @@ export async function generate(): Promise<string[]> {
   // Collective (L4)
   const collectiveResult = await runCollectiveScenario();
   const collectiveDoc = {
-    _status: "PRE-NORMATIVE",
+    _status: "NORMATIVE",
     meta: {
       package: "@mnemosyne/spine",
       spec_basis:
