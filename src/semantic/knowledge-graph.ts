@@ -42,31 +42,80 @@ export interface KnowledgeGraph {
 
 /** In-memory reference knowledge graph. Deterministic; correctness over speed. */
 export class LocalKnowledgeGraph implements KnowledgeGraph {
-  addFact(_fact: Fact): void {
-    throw new Error("[TODO_L3] LocalKnowledgeGraph.addFact not implemented");
+  /** Fact identity: compound key (subject, predicate, object, sourceObjectId). */
+  private readonly facts = new Map<string, Fact>();
+
+  private factKey(f: Fact): string {
+    return `${f.triple.subject}\x00${f.triple.predicate}\x00${f.triple.object}\x00${f.sourceObjectId}`;
   }
 
-  removeBySource(_sourceObjectId: string): void {
-    throw new Error("[TODO_L3] LocalKnowledgeGraph.removeBySource not implemented");
+  /** Canonical order: ascending by (subject, predicate, object, sourceObjectId). */
+  private canonicalOrder(fs: Fact[]): Fact[] {
+    fs.sort((a, b) => {
+      const cmp = this.compareStr(a.triple.subject, b.triple.subject);
+      if (cmp !== 0) return cmp;
+      const cmpP = this.compareStr(a.triple.predicate, b.triple.predicate);
+      if (cmpP !== 0) return cmpP;
+      const cmpO = this.compareStr(a.triple.object, b.triple.object);
+      if (cmpO !== 0) return cmpO;
+      return this.compareStr(a.sourceObjectId, b.sourceObjectId);
+    });
+    return fs;
   }
 
-  match(_pattern: TriplePattern): readonly Fact[] {
-    throw new Error("[TODO_L3] LocalKnowledgeGraph.match not implemented");
+  private compareStr(a: string, b: string): number {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
   }
 
-  neighbors(_entity: string): readonly Fact[] {
-    throw new Error("[TODO_L3] LocalKnowledgeGraph.neighbors not implemented");
+  addFact(fact: Fact): void {
+    this.facts.set(this.factKey(fact), fact);
+  }
+
+  removeBySource(sourceObjectId: string): void {
+    for (const [key, fact] of this.facts) {
+      if (fact.sourceObjectId === sourceObjectId) {
+        this.facts.delete(key);
+      }
+    }
+  }
+
+  match(pattern: TriplePattern): readonly Fact[] {
+    const all = [...this.facts.values()];
+    const filtered = all.filter((f) => {
+      if (pattern.subject !== undefined && pattern.subject !== f.triple.subject) return false;
+      if (pattern.predicate !== undefined && pattern.predicate !== f.triple.predicate) return false;
+      if (pattern.object !== undefined && pattern.object !== f.triple.object) return false;
+      return true;
+    });
+    return this.canonicalOrder(filtered);
+  }
+
+  neighbors(entity: string): readonly Fact[] {
+    const all = [...this.facts.values()];
+    const filtered = all.filter(
+      (f) => f.triple.subject === entity || f.triple.object === entity,
+    );
+    return this.canonicalOrder(filtered);
   }
 
   entities(): readonly string[] {
-    throw new Error("[TODO_L3] LocalKnowledgeGraph.entities not implemented");
+    const set = new Set<string>();
+    for (const f of this.facts.values()) {
+      set.add(f.triple.subject);
+      set.add(f.triple.object);
+    }
+    const arr = [...set];
+    arr.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    return arr;
   }
 
   size(): number {
-    throw new Error("[TODO_L3] LocalKnowledgeGraph.size not implemented");
+    return this.facts.size;
   }
 
   clear(): void {
-    throw new Error("[TODO_L3] LocalKnowledgeGraph.clear not implemented");
+    this.facts.clear();
   }
 }

@@ -50,7 +50,22 @@ export class DelimitedExtractor implements FactExtractor {
     this.delimiter = delimiter;
   }
 
-  async extract(_text: string): Promise<readonly Triple[]> {
-    throw new Error("[TODO_L3] DelimitedExtractor.extract not implemented");
+  async extract(text: string): Promise<readonly Triple[]> {
+    const result: Triple[] = [];
+    const lines = text.split("\n");
+    for (const line of lines) {
+      const parts = line.split(this.delimiter);
+      // Split on delimiter, trim each field
+      const trimmed = parts.map((p) => p.trim());
+      // Skip lines that don't yield exactly three non-empty fields
+      if (trimmed.length !== 3) continue;
+      if (trimmed[0]!.length === 0 || trimmed[1]!.length === 0 || trimmed[2]!.length === 0) continue;
+      result.push({
+        subject: trimmed[0]!,
+        predicate: trimmed[1]!,
+        object: trimmed[2]!,
+      });
+    }
+    return result;
   }
 }

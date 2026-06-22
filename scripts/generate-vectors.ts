@@ -1,6 +1,6 @@
 /**
- * (Re)generate the PRE-NORMATIVE spine + anchor + recall golden vectors
- * (TASK §T8.3 + L1 §2.1 + L2 §2.1). Deterministic: re-running this produces
+ * (Re)generate the PRE-NORMATIVE spine + anchor + recall + semantic golden vectors
+ * (TASK §T8.3 + L1 §2.1 + L2 §2.1 + L3 §2.1). Deterministic: re-running this produces
  * byte-identical files. The architect promotes "_status" PRE-NORMATIVE → NORMATIVE.
  *
  *   npm run vectors:generate
@@ -11,11 +11,13 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { runScenario } from "./spine-scenario.js";
 import { runAnchorScenario } from "./anchor-scenario.js";
 import { runRecallScenario } from "./recall-scenario.js";
+import { runSemanticScenario } from "./semantic-scenario.js";
 
 const BASE = join(dirname(fileURLToPath(import.meta.url)), "..", "vectors");
 const SPINE_OUT = join(BASE, "spine", "golden.json");
 const ANCHOR_OUT = join(BASE, "anchor", "golden.json");
 const RECALL_OUT = join(BASE, "recall", "golden.json");
+const SEMANTIC_OUT = join(BASE, "semantic", "golden.json");
 
 export async function generate(): Promise<string[]> {
   const outputs: string[] = [];
@@ -78,6 +80,27 @@ export async function generate(): Promise<string[]> {
   await mkdir(dirname(RECALL_OUT), { recursive: true });
   await writeFile(RECALL_OUT, recallJson);
   outputs.push(RECALL_OUT);
+
+  // Semantic (L3)
+  const semanticResult = await runSemanticScenario();
+  const semanticDoc = {
+    _status: "PRE-NORMATIVE",
+    meta: {
+      package: "@mnemosyne/spine",
+      spec_basis:
+        "Mnemosyne L3 Semantic v0.1-draft (docs/spec/l3-semantic-v0.1-draft.md), D7",
+      description:
+        "Deterministic semantic golden: fixed DelimitedExtractor (tab), fixed corpus of " +
+        "{objectId, text} with triple lines, fixed match/neighbors/entities queries. " +
+        "Pins extraction + dedup + match + neighbors + canonical ordering. All strings → exact comparison. " +
+        "Regenerate with `npm run vectors:generate`.",
+    },
+    scenario: semanticResult,
+  };
+  const semanticJson = JSON.stringify(semanticDoc, null, 2) + "\n";
+  await mkdir(dirname(SEMANTIC_OUT), { recursive: true });
+  await writeFile(SEMANTIC_OUT, semanticJson);
+  outputs.push(SEMANTIC_OUT);
 
   return outputs;
 }

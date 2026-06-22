@@ -30,9 +30,52 @@ export interface Semantic {
 }
 
 /** Construct a Semantic facade over an extractor + graph. */
-export function createSemantic(_deps: {
+export function createSemantic(deps: {
   extractor: FactExtractor;
   graph: KnowledgeGraph;
 }): Semantic {
-  throw new Error("[TODO_L3] createSemantic not implemented");
+  const { extractor, graph } = deps;
+
+  /** Resolve a SemanticSource to Triple[]. */
+  async function resolve(source: SemanticSource): Promise<readonly Triple[]> {
+    if ("text" in source) {
+      return extractor.extract(source.text);
+    }
+    return source.triples;
+  }
+
+  return {
+    async ingestObject(objectId: string, source: SemanticSource): Promise<number> {
+      const triples = await resolve(source);
+      for (const t of triples) {
+        graph.addFact({ triple: t, sourceObjectId: objectId });
+      }
+      return triples.length;
+    },
+
+    async rebuild(
+      objects: AsyncIterable<{ objectId: string; text: string }>,
+    ): Promise<number> {
+      graph.clear();
+      for await (const { objectId, text } of objects) {
+        const triples = await extractor.extract(text);
+        for (const t of triples) {
+          graph.addFact({ triple: t, sourceObjectId: objectId });
+        }
+      }
+      return graph.size();
+    },
+
+    query(pattern: TriplePattern): readonly Fact[] {
+      return graph.match(pattern);
+    },
+
+    neighbors(entity: string): readonly Fact[] {
+      return graph.neighbors(entity);
+    },
+
+    removeObject(objectId: string): void {
+      graph.removeBySource(objectId);
+    },
+  };
 }

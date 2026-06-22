@@ -1,0 +1,420 @@
+{
+  "_status": "PRE-NORMATIVE",
+  "meta": {
+    "package": "@mnemosyne/spine",
+    "spec_basis": "Mnemosyne L3 Semantic v0.1-draft (docs/spec/l3-semantic-v0.1-draft.md), D7",
+    "description": "Deterministic semantic golden: fixed DelimitedExtractor (tab), fixed corpus of {objectId, text} with triple lines, fixed match/neighbors/entities queries. Pins extraction + dedup + match + neighbors + canonical ordering. All strings → exact comparison. Regenerate with `npm run vectors:generate`."
+  },
+  "scenario": {
+    "extractor_name": "delimited-extractor-v1",
+    "delimiter": "\\t",
+    "corpus": [
+      {
+        "objectId": "obj:alpha",
+        "text": "Alice\tknows\tBob\nAlice\tloves\tcode\nBob\twrote\tMnemosyne",
+        "triples": [
+          {
+            "subject": "Alice",
+            "predicate": "knows",
+            "object": "Bob"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "loves",
+            "object": "code"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "wrote",
+            "object": "Mnemosyne"
+          }
+        ]
+      },
+      {
+        "objectId": "obj:beta",
+        "text": "Bob\tknows\tEve\nEve\treviewed\tMnemosyne\nCarol\tjoined\tteam",
+        "triples": [
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Eve"
+          },
+          {
+            "subject": "Eve",
+            "predicate": "reviewed",
+            "object": "Mnemosyne"
+          },
+          {
+            "subject": "Carol",
+            "predicate": "joined",
+            "object": "team"
+          }
+        ]
+      },
+      {
+        "objectId": "obj:gamma",
+        "text": "Alice\tmentors\tCarol\nCarol\tcodes\tTypeScript\nBob\treviewed\tcode",
+        "triples": [
+          {
+            "subject": "Alice",
+            "predicate": "mentors",
+            "object": "Carol"
+          },
+          {
+            "subject": "Carol",
+            "predicate": "codes",
+            "object": "TypeScript"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "reviewed",
+            "object": "code"
+          }
+        ]
+      },
+      {
+        "objectId": "obj:delta",
+        "text": "line with four\tfields\there\textra\n\nAlice\twrote\tpaper\nBob\tknows\tAlice",
+        "triples": [
+          {
+            "subject": "Alice",
+            "predicate": "wrote",
+            "object": "paper"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Alice"
+          }
+        ]
+      },
+      {
+        "objectId": "obj:epsilon",
+        "text": "Dave\tjoined\tteam\nDave\tcodes\tRust\nEve\tmentors\tDave",
+        "triples": [
+          {
+            "subject": "Dave",
+            "predicate": "joined",
+            "object": "team"
+          },
+          {
+            "subject": "Dave",
+            "predicate": "codes",
+            "object": "Rust"
+          },
+          {
+            "subject": "Eve",
+            "predicate": "mentors",
+            "object": "Dave"
+          }
+        ]
+      }
+    ],
+    "entities": [
+      "Alice",
+      "Bob",
+      "Carol",
+      "Dave",
+      "Eve",
+      "Mnemosyne",
+      "Rust",
+      "TypeScript",
+      "code",
+      "paper",
+      "team"
+    ],
+    "fact_count": 14,
+    "match_queries": [
+      {
+        "label": "subject:Alice",
+        "pattern": {
+          "subject": "Alice"
+        },
+        "results": [
+          {
+            "subject": "Alice",
+            "predicate": "knows",
+            "object": "Bob",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "loves",
+            "object": "code",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "mentors",
+            "object": "Carol",
+            "sourceObjectId": "obj:gamma"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "wrote",
+            "object": "paper",
+            "sourceObjectId": "obj:delta"
+          }
+        ]
+      },
+      {
+        "label": "predicate:knows",
+        "pattern": {
+          "predicate": "knows"
+        },
+        "results": [
+          {
+            "subject": "Alice",
+            "predicate": "knows",
+            "object": "Bob",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Alice",
+            "sourceObjectId": "obj:delta"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Eve",
+            "sourceObjectId": "obj:beta"
+          }
+        ]
+      },
+      {
+        "label": "object:Mnemosyne",
+        "pattern": {
+          "object": "Mnemosyne"
+        },
+        "results": [
+          {
+            "subject": "Bob",
+            "predicate": "wrote",
+            "object": "Mnemosyne",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Eve",
+            "predicate": "reviewed",
+            "object": "Mnemosyne",
+            "sourceObjectId": "obj:beta"
+          }
+        ]
+      },
+      {
+        "label": "full:Alice:knows:Bob",
+        "pattern": {
+          "subject": "Alice",
+          "predicate": "knows",
+          "object": "Bob"
+        },
+        "results": [
+          {
+            "subject": "Alice",
+            "predicate": "knows",
+            "object": "Bob",
+            "sourceObjectId": "obj:alpha"
+          }
+        ]
+      },
+      {
+        "label": "empty:all",
+        "pattern": {},
+        "results": [
+          {
+            "subject": "Alice",
+            "predicate": "knows",
+            "object": "Bob",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "loves",
+            "object": "code",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "mentors",
+            "object": "Carol",
+            "sourceObjectId": "obj:gamma"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "wrote",
+            "object": "paper",
+            "sourceObjectId": "obj:delta"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Alice",
+            "sourceObjectId": "obj:delta"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Eve",
+            "sourceObjectId": "obj:beta"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "reviewed",
+            "object": "code",
+            "sourceObjectId": "obj:gamma"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "wrote",
+            "object": "Mnemosyne",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Carol",
+            "predicate": "codes",
+            "object": "TypeScript",
+            "sourceObjectId": "obj:gamma"
+          },
+          {
+            "subject": "Carol",
+            "predicate": "joined",
+            "object": "team",
+            "sourceObjectId": "obj:beta"
+          },
+          {
+            "subject": "Dave",
+            "predicate": "codes",
+            "object": "Rust",
+            "sourceObjectId": "obj:epsilon"
+          },
+          {
+            "subject": "Dave",
+            "predicate": "joined",
+            "object": "team",
+            "sourceObjectId": "obj:epsilon"
+          },
+          {
+            "subject": "Eve",
+            "predicate": "mentors",
+            "object": "Dave",
+            "sourceObjectId": "obj:epsilon"
+          },
+          {
+            "subject": "Eve",
+            "predicate": "reviewed",
+            "object": "Mnemosyne",
+            "sourceObjectId": "obj:beta"
+          }
+        ]
+      },
+      {
+        "label": "subject:unknown",
+        "pattern": {
+          "subject": "UnknownEntity"
+        },
+        "results": []
+      }
+    ],
+    "neighbor_queries": [
+      {
+        "entity": "Alice",
+        "results": [
+          {
+            "subject": "Alice",
+            "predicate": "knows",
+            "object": "Bob",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "loves",
+            "object": "code",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "mentors",
+            "object": "Carol",
+            "sourceObjectId": "obj:gamma"
+          },
+          {
+            "subject": "Alice",
+            "predicate": "wrote",
+            "object": "paper",
+            "sourceObjectId": "obj:delta"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Alice",
+            "sourceObjectId": "obj:delta"
+          }
+        ]
+      },
+      {
+        "entity": "Bob",
+        "results": [
+          {
+            "subject": "Alice",
+            "predicate": "knows",
+            "object": "Bob",
+            "sourceObjectId": "obj:alpha"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Alice",
+            "sourceObjectId": "obj:delta"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Eve",
+            "sourceObjectId": "obj:beta"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "reviewed",
+            "object": "code",
+            "sourceObjectId": "obj:gamma"
+          },
+          {
+            "subject": "Bob",
+            "predicate": "wrote",
+            "object": "Mnemosyne",
+            "sourceObjectId": "obj:alpha"
+          }
+        ]
+      },
+      {
+        "entity": "Eve",
+        "results": [
+          {
+            "subject": "Bob",
+            "predicate": "knows",
+            "object": "Eve",
+            "sourceObjectId": "obj:beta"
+          },
+          {
+            "subject": "Eve",
+            "predicate": "mentors",
+            "object": "Dave",
+            "sourceObjectId": "obj:epsilon"
+          },
+          {
+            "subject": "Eve",
+            "predicate": "reviewed",
+            "object": "Mnemosyne",
+            "sourceObjectId": "obj:beta"
+          }
+        ]
+      },
+      {
+        "entity": "UnknownEntity",
+        "results": []
+      }
+    ]
+  }
+}
