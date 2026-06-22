@@ -31,6 +31,8 @@ export const MNEMOSYNE_TAGS = {
   VAULT_ROOT_V1: "MNEMOSYNE_VAULT_ROOT_V1",
   /** L1: one tamper-evident link in a vault's hash-linked anchor checkpoint chain (D5). */
   ANCHOR_CHECKPOINT_V1: "MNEMOSYNE_ANCHOR_CHECKPOINT_V1",
+  /** L4: a Vault→Agent capability delegation; capability_id = domainHash(CAPABILITY_V1, …) (D8). */
+  CAPABILITY_V1: "MNEMOSYNE_CAPABILITY_V1",
 } as const;
 
 export const DOMAIN_TAGS = { ...CE_V13_TAGS, ...MNEMOSYNE_TAGS } as const;

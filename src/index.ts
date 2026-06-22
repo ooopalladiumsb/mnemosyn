@@ -9,6 +9,7 @@
  *   - adapters:  StorageAdapter (LocalCAS) · AnchorAdapter (LocalSigned) · LLMProvider seam
  *   - recall:    L2 derived semantic recall (EmbeddingProvider · RecallIndex · Recall) — out-of-root
  *   - semantic:  L3 derived fact extraction + knowledge graph (FactExtractor · KnowledgeGraph) — out-of-root
+ *   - collective: L4 multi-writer delegation (Capability · AuthorizingSpine) — authorization layer
  */
 export * as canonical from "./canonical/index.js";
 export * from "./spine/index.js";
@@ -17,3 +18,4 @@ export * from "./crypto/encryption.js";
 export * from "./adapters/index.js";
 export * as recall from "./recall/index.js";
 export * as semantic from "./semantic/index.js";
+export * as collective from "./collective/index.js";
