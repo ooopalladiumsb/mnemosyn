@@ -12,6 +12,7 @@
  * SIGNATURES are FROZEN; DeepSeek implements the body (docs/TASK-deepseek-D10.md).
  */
 import type { EncMeta } from "../spine/types.js";
+import { encrypt, decrypt } from "../crypto/encryption.js";
 
 /** Ciphertext + the `EncMeta` the committed `MemoryObject` will carry. Fed straight to `spine.append`. */
 export interface SealedContent {
@@ -36,16 +37,20 @@ export interface VaultKeyManager {
  */
 export class LocalVaultKeyManager implements VaultKeyManager {
   readonly keyId: string;
+  private readonly kek: Uint8Array;
 
-  constructor(_vaultKek: Uint8Array, keyId: string) {
+  constructor(vaultKek: Uint8Array, keyId: string) {
     this.keyId = keyId;
+    // Store a copy so caller mutation of the input array cannot change the held KEK.
+    this.kek = vaultKek.slice();
   }
 
-  async seal(_plaintext: Uint8Array): Promise<SealedContent> {
-    throw new Error("[TODO_D10] LocalVaultKeyManager.seal not implemented");
+  async seal(plaintext: Uint8Array): Promise<SealedContent> {
+    const r = encrypt(plaintext, this.kek, this.keyId);
+    return { ciphertext: r.ciphertext, enc: r.enc };
   }
 
-  async open(_ciphertext: Uint8Array, _enc: EncMeta): Promise<Uint8Array> {
-    throw new Error("[TODO_D10] LocalVaultKeyManager.open not implemented");
+  async open(ciphertext: Uint8Array, enc: EncMeta): Promise<Uint8Array> {
+    return decrypt(ciphertext, enc, this.kek);
   }
 }

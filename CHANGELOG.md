@@ -2,6 +2,28 @@
 
 All notable changes to Mnemosyne are documented here.
 
+## v1.1.0 — 2026-06-23
+
+Adds the **agent host** (`@mnemosyne/agent`, D10) — the Stage-0 TS/Node layer that turns
+verifiable memory into an *agent with* verifiable memory, in the same ecosystem, with no Web3
+framework and no new runtime dependencies. 192 tests pass.
+
+### Added
+- **Brain seam** (`Brain` + deterministic `ScriptedBrain`) — the autonomous decider that returns a
+  reply and `MemoryDraft`s; the real surface for the reserved `LLMProvider` placeholder. Real LLM
+  Brains are an untested seam.
+- **Vault key custody** (`VaultKeyManager` + in-memory `LocalVaultKeyManager`) — the one piece the
+  spine deliberately omits: holds the KEK, seals plaintext → ciphertext+`EncMeta`, opens it back
+  (reuses L0 AES-256-GCM). The KEK and plaintext never enter a hashed value.
+- **Agent loop** (`MnemosyneAgent` / `createAgent`) — `turn(input)` drives recall → brain → seal →
+  append over the **unmodified** spine; memory is Vault-owned, Agent-written.
+
+### Invariants
+The commitment line holds end-to-end: only ciphertext is committed; no new domain tag; no golden (a
+live GCM nonce makes sessions non-reproducible by design — loop fidelity + round-trip are the
+contract); zero edits to the frozen L0–L5 surface. Real Brains / key backends (LLM, OS keychain,
+TEE) and L4-grant enforcement remain deferred seams.
+
 ## v1.0.0 — 2026-06-23
 
 First stable release. The full build order (L0–L5) is implemented, reviewed, and

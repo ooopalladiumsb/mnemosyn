@@ -59,8 +59,7 @@ export class ScriptedBrain implements Brain {
 
   constructor(private readonly script: (input: string, context: RecalledContext) => BrainTurn) {}
 
-  async turn(_input: string, _context: RecalledContext): Promise<BrainTurn> {
-    void this.script; // the body (TASK-deepseek-D10) delegates to this.script
-    throw new Error("[TODO_D10] ScriptedBrain.turn not implemented");
+  async turn(input: string, context: RecalledContext): Promise<BrainTurn> {
+    return this.script(input, context);
   }
 }
