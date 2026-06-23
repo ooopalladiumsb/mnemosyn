@@ -41,7 +41,7 @@ import or fork terra's consensus-frozen (PFC-1) runtime. "Spec-compatible, not r
 | **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D11) · conformance 9/9 · `vectors:generate` (+ body golden, deterministic) · frozen L0–D10 untouched · body conformance vs terra format · NOTES/objection reviewed | ☑ PASS (terra-body 4/4) |
 | **M4** | Commit + push offline (skeleton→impl) | You ratify; Claude prepares | pushed to `ooopalladiumsb/mnemosyn` | ☑ |
 | **M5** | **LIVE** testnet settlement of a real memory_root | Operator (broadcast) + Claude (verify) | SETTLED tx VGhMnVF… · on-chain body cell-hash == pinned (6fb9e8a8…) | ☑ |
-| **M6** | Release `v1.2.0` + GitHub Release | You | tag + Release published | ☐ |
+| **M6** | Release `v1.2.0` + GitHub Release | You | tag v1.2.0 + GitHub Release published | ☑ |
 
 **Control loop:** after each milestone Claude reports the gate outcome (pass/fail + numbers); you
 tick the box. M2/M3 follow the proven layer ritual; M5 is the only operator-driven, network-gated step.

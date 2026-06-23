@@ -2,6 +2,31 @@
 
 All notable changes to Mnemosyne are documented here.
 
+## v1.2.0 — 2026-06-23
+
+Adds **real TON anchoring** (D11) — and the first live link between Mnemosyne and paradigm_terra. A
+`vault_memory_root` can now be settled on-chain using terra's proven anchor-body transport. 206 tests
+pass; the first root was anchored live on ton-testnet (see `docs/notes/d11-testnet-settlement.md`).
+
+### Added
+- **`anchor-ton`** module — `anchorBodyCell`/`anchorBodyBoc`/`parseAnchorRoot` build the on-chain
+  anchor body (op "PTA1" || 256-bit root), **byte-identical to paradigm_terra's** `pp2/anchor-body`
+  (conformance-pinned 4/4 against `vectors/anchor-ton/terra-body-golden.json`, REPLICATED not imported
+  — spec-compatible, not runtime-coupled).
+- **`Broadcaster`** seam (the network boundary, operator-gated) + deterministic `MockBroadcaster`.
+- **`TonAnchorAdapter`** — a real `AnchorAdapter`: build → broadcast → receipt; supersedes the L1
+  `TonAnchor` stub.
+
+### Dependency
+- `@ton/core@0.63.1` (matches terra) — the **first runtime dependency**, ISOLATED to `src/anchor-ton/`
+  (a structural test enforces it); the pure core (L0–D10) stays dependency-free.
+
+### Live
+- First `vault_memory_root` (the NORMATIVE spine-golden root) anchored on **ton-testnet**; the
+  on-chain message body cell-hash is **byte-identical to the pinned body** (settle-tx
+  `VGhMnVF/8DHfe9SkesuX0VIx/T96LCQSjZXuaf/PrR8=`). The live broadcaster stays operator tooling; the
+  library ships the deterministic body + `MockBroadcaster`.
+
 ## v1.1.0 — 2026-06-23
 
 Adds the **agent host** (`@mnemosyne/agent`, D10) — the Stage-0 TS/Node layer that turns
