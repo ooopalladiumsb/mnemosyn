@@ -38,8 +38,8 @@ import or fork terra's consensus-frozen (PFC-1) runtime. "Spec-compatible, not r
 | **M0** | Ratify framing (body-format fork + offline/live split) | You | RATIFIED: replicate + conformance | ☑ |
 | **M1** | Contract package: `docs/spec/d11-ton-anchor-v0.1-draft.md` + frozen skeleton (`src/anchor-ton/`) + `docs/TASK-deepseek-D11.md` | Claude | skeleton typechecks; 192 tests still green; skeleton committed | ☑ |
 | **M2** | Offline impl: `buildAnchorBody` + `TonAnchorAdapter(Broadcaster)` + body-golden + tests | DeepSeek (`--local`) | all stub bodies replaced; NOTES written | ☐ |
-| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D11) · conformance 9/9 · `vectors:generate` (+ body golden, deterministic) · frozen L0–D10 untouched · body conformance vs terra format · NOTES/objection reviewed | ☐ |
-| **M4** | Commit + push offline (skeleton→impl) | You ratify; Claude prepares | pushed to `ooopalladiumsb/mnemosyn` | ☐ |
+| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D11) · conformance 9/9 · `vectors:generate` (+ body golden, deterministic) · frozen L0–D10 untouched · body conformance vs terra format · NOTES/objection reviewed | ☑ PASS (terra-body 4/4) |
+| **M4** | Commit + push offline (skeleton→impl) | You ratify; Claude prepares | pushed to `ooopalladiumsb/mnemosyn` | ☑ |
 | **M5** | **LIVE** testnet settlement of a real memory_root | Operator (broadcast) + Claude (verify) | funded testnet wallet → broadcast → **on-chain body byte-matches pinned body** → settlement record in `docs/notes/` | ☐ |
 | **M6** | Release `v1.2.0` + GitHub Release | You | tag + Release published | ☐ |
 

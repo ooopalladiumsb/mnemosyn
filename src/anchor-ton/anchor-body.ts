@@ -26,8 +26,18 @@ export class AnchorBodyError extends Error {
     readonly code: string,
     msg: string,
   ) {
-    super(msg);
+    super(`[${code}] ${msg}`);
     this.name = "AnchorBodyError";
+  }
+}
+
+/** Validate rootHex is exactly 64 lowercase hex chars, no 0x prefix. */
+function validateRootHex(rootHex: string): void {
+  if (!/^[0-9a-f]{64}$/.test(rootHex)) {
+    throw new AnchorBodyError(
+      "ANCHOR_BAD_ROOT",
+      `root hex must be 64 lowercase hex chars (no 0x prefix), got ${JSON.stringify(rootHex)}`,
+    );
   }
 }
 
@@ -36,17 +46,29 @@ export class AnchorBodyError extends Error {
  * Mnemosyne root format — lowercase 64-hex, NO `0x` prefix (as `AnchorReceipt.root`). Throws
  * `[ANCHOR_BAD_ROOT]` on anything else.
  */
-export function anchorBodyCell(_rootHex: string): Cell {
-  void beginCell; // body (TASK-deepseek-D11) uses beginCell().storeUint(ANCHOR_OP,32).storeBuffer(root)
-  throw new Error("[TODO_D11] anchorBodyCell not implemented");
+export function anchorBodyCell(rootHex: string): Cell {
+  validateRootHex(rootHex);
+  return beginCell()
+    .storeUint(ANCHOR_OP, 32)
+    .storeBuffer(Buffer.from(rootHex, "hex"))
+    .endCell();
 }
 
 /** The pinned anchor body as a base64 BoC — the exact bytes to embed in the broadcast message body. */
-export function anchorBodyBoc(_rootHex: string): string {
-  throw new Error("[TODO_D11] anchorBodyBoc not implemented");
+export function anchorBodyBoc(rootHex: string): string {
+  return anchorBodyCell(rootHex).toBoc().toString("base64");
 }
 
 /** Parse an anchor body cell back to its lowercase 64-hex root, asserting the op tag (`[ANCHOR_BAD_OP]`). */
-export function parseAnchorRoot(_cell: Cell): string {
-  throw new Error("[TODO_D11] parseAnchorRoot not implemented");
+export function parseAnchorRoot(cell: Cell): string {
+  const s = cell.beginParse();
+  const op = s.loadUint(32);
+  if (op !== ANCHOR_OP) {
+    throw new AnchorBodyError(
+      "ANCHOR_BAD_OP",
+      `expected op 0x${ANCHOR_OP.toString(16)}, got 0x${op.toString(16)}`,
+    );
+  }
+  const buf = s.loadBuffer(32);
+  return buf.toString("hex");
 }

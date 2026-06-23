@@ -9,6 +9,8 @@
 import type { AnchorAdapter, AnchorReceipt } from "../adapters/anchor.js";
 import type { VaultDid, Hash256 } from "../spine/types.js";
 import type { Broadcaster } from "./broadcaster.js";
+import { toHex } from "../canonical/hash.js";
+import { anchorBodyBoc } from "./anchor-body.js";
 
 /**
  * Content-addressed root anchor over TON. Build → broadcast → receipt. `latest` is tracked in
@@ -16,15 +18,20 @@ import type { Broadcaster } from "./broadcaster.js";
  * authority lives inside the `Broadcaster` (the operator key), NOT here.
  */
 export class TonAnchorAdapter implements AnchorAdapter {
+  private readonly latestByVault = new Map<string, { root: string; version: bigint }>();
+
   constructor(private readonly broadcaster: Broadcaster) {}
 
   /** Build the pinned anchor body for `root`, broadcast it, and return a receipt (`proof` = txHash). */
-  async anchor(_vaultDid: VaultDid, _root: Hash256, _version: bigint): Promise<AnchorReceipt> {
-    void this.broadcaster;
-    throw new Error("[TODO_D11] TonAnchorAdapter.anchor not implemented");
+  async anchor(vaultDid: VaultDid, root: Hash256, version: bigint): Promise<AnchorReceipt> {
+    const rootHex = toHex(root);
+    const bodyBoc = anchorBodyBoc(rootHex);
+    const { txHash } = await this.broadcaster.broadcast({ bodyBoc, vaultDid, version });
+    this.latestByVault.set(vaultDid, { root: rootHex, version });
+    return { vaultDid, root: rootHex, version, proof: txHash };
   }
 
-  async latest(_vaultDid: VaultDid): Promise<{ root: string; version: bigint } | null> {
-    throw new Error("[TODO_D11] TonAnchorAdapter.latest not implemented");
+  async latest(vaultDid: VaultDid): Promise<{ root: string; version: bigint } | null> {
+    return this.latestByVault.get(vaultDid) ?? null;
   }
 }

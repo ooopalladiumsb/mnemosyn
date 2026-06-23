@@ -8,6 +8,7 @@
  * ARCHITECT-OWNED CONTRACT. `BroadcastRequest`/`BroadcastResult`/`Broadcaster` + `MockBroadcaster`
  * SIGNATURES are FROZEN; DeepSeek implements the `MockBroadcaster` body (docs/TASK-deepseek-D11.md).
  */
+import { createHash } from "node:crypto";
 import type { VaultDid } from "../spine/types.js";
 
 /** What to broadcast: the pinned anchor body (base64 BoC) + the vault/version it anchors. */
@@ -31,12 +32,27 @@ export interface Broadcaster {
 
 /**
  * Deterministic offline broadcaster for tests: derives a fake `txHash` from `SHA-256(bodyBoc ||
- * version)` (hex). No network, no key. Lets `TonAnchorAdapter` be exercised without TON.
+ * uint64be(version))` (hex). No network, no key. Lets `TonAnchorAdapter` be exercised without TON.
+ *
+ * ## txHash derivation (documented for reproducibility)
+ *
+ * 1. Encode `bodyBoc` as UTF-8.
+ * 2. Encode `version` as a big-endian uint64 (8 bytes).
+ * 3. `SHA-256(utf8(bodyBoc) || uint64be(version))` → 32 bytes → lowercase hex.
  */
 export class MockBroadcaster implements Broadcaster {
   readonly name = "mock-broadcaster-v1";
 
-  async broadcast(_req: BroadcastRequest): Promise<BroadcastResult> {
-    throw new Error("[TODO_D11] MockBroadcaster.broadcast not implemented");
+  async broadcast(req: BroadcastRequest): Promise<BroadcastResult> {
+    const bodyBytes = new TextEncoder().encode(req.bodyBoc);
+    const versionBytes = new Uint8Array(8);
+    const view = new DataView(versionBytes.buffer);
+    view.setBigUint64(0, req.version, false); // big-endian
+    const combined = new Uint8Array(bodyBytes.length + 8);
+    combined.set(bodyBytes, 0);
+    combined.set(versionBytes, bodyBytes.length);
+    const digest = createHash("sha256").update(combined).digest();
+    const txHash = Buffer.from(digest).toString("hex");
+    return { txHash };
   }
 }
