@@ -1,0 +1,15 @@
+{
+  "_status": "NORMATIVE",
+  "_meta": {
+    "what": "paradigm_terra anchor-body conformance fixtures — Mnemosyne's buildAnchorBody MUST reproduce these byte-for-byte (BoC base64) for the same 32-byte root.",
+    "source": "paradigm_terra/pp2/src/anchor-body.ts (anchorBodyBoc), @ton/core@0.63.1",
+    "transport": "anchor body cell = op:uint32 (ANCHOR_OP 'PTA1' = 0x50544131) || root:256bit raw",
+    "note": "root_hex is the lowercase 64-hex Mnemosyne vault_memory_root (no 0x prefix). Vendored verbatim from terra (spec-compatible, not runtime-coupled), the same way CE v1.3 golden is vendored."
+  },
+  "vectors": [
+    { "root_hex": "0000000000000000000000000000000000000000000000000000000000000000", "boc_base64": "te6cckEBAQEAJgAASFBUQTEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJoRf7E=" },
+    { "root_hex": "abababababababababababababababababababababababababababababababab", "boc_base64": "te6cckEBAQEAJgAASFBUQTGrq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq1E1Gx4=" },
+    { "root_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "boc_base64": "te6cckEBAQEAJgAASFBUQTEBI0VniavN7wEjRWeJq83vASNFZ4mrze8BI0VniavN752qeQI=" },
+    { "root_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "boc_base64": "te6cckEBAQEAJgAASFBUQTH//////////////////////////////////////////3OMRlk=" }
+  ]
+}
