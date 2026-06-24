@@ -14,6 +14,25 @@
  */
 import type { MnemosyneAgent } from "../agent/agent.js";
 import type { VaultDid } from "../spine/types.js";
+import { isVaultDid } from "../identity/did.js";
+
+// ---------------------------------------------------------------------------
+// Safe response helpers
+// ---------------------------------------------------------------------------
+
+/** Constant safe error body — NEVER a stack trace, API key, plaintext, or ciphertext. */
+const SAFE_INTERNAL_ERROR_BODY = '{"error":"internal error"}';
+
+function jsonResponse(body: unknown, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Authenticator
+// ---------------------------------------------------------------------------
 
 /** Maps an incoming request to the vault it acts on, or null if unauthorized. */
 export interface Authenticator {
@@ -27,11 +46,17 @@ export interface Authenticator {
 export class HeaderAuthenticator implements Authenticator {
   constructor(private readonly headerName: string = "x-vault-did") {}
 
-  async authenticate(_req: Request): Promise<{ vaultDid: VaultDid } | null> {
-    void this.headerName;
-    throw new Error("[TODO_D13] HeaderAuthenticator.authenticate not implemented");
+  async authenticate(req: Request): Promise<{ vaultDid: VaultDid } | null> {
+    const value = req.headers.get(this.headerName);
+    if (typeof value !== "string") return null;
+    if (!isVaultDid(value)) return null;
+    return { vaultDid: value };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Registry
+// ---------------------------------------------------------------------------
 
 /** Get-or-create + cache one `MnemosyneAgent` per vault. */
 export interface AgentRegistry {
@@ -43,10 +68,24 @@ export interface AgentRegistry {
  * The factory wires the vault's spine/brain/embedder/recall/keys — all secrets stay inside it.
  */
 export function createAgentRegistry(
-  _createAgentForVault: (vaultDid: VaultDid) => MnemosyneAgent | Promise<MnemosyneAgent>,
+  createAgentForVault: (vaultDid: VaultDid) => MnemosyneAgent | Promise<MnemosyneAgent>,
 ): AgentRegistry {
-  throw new Error("[TODO_D13] createAgentRegistry not implemented");
+  const cache = new Map<VaultDid, Promise<MnemosyneAgent>>();
+
+  return {
+    async forVault(vaultDid: VaultDid): Promise<MnemosyneAgent> {
+      const existing = cache.get(vaultDid);
+      if (existing) return existing;
+      const promise = Promise.resolve(createAgentForVault(vaultDid));
+      cache.set(vaultDid, promise);
+      return promise;
+    },
+  };
 }
+
+// ---------------------------------------------------------------------------
+// Handler
+// ---------------------------------------------------------------------------
 
 /** The `POST /turn` response body. */
 export interface TurnResponse {
@@ -61,9 +100,77 @@ export interface TurnResponse {
  *    401 (unauthenticated), 400 (missing/invalid `input`), 404 (other paths), 500 (internal — a SAFE
  *    JSON error, never a stack trace, key, or plaintext). All responses are `application/json`.
  */
-export function createAgentHandler(_deps: {
+export function createAgentHandler(deps: {
   registry: AgentRegistry;
   authenticator: Authenticator;
 }): (req: Request) => Promise<Response> {
-  throw new Error("[TODO_D13] createAgentHandler not implemented");
+  const { registry, authenticator } = deps;
+
+  return async (req: Request): Promise<Response> => {
+    const url = new URL(req.url);
+    const path = url.pathname;
+    const method = req.method;
+
+    // GET /health
+    if (method === "GET" && path === "/health") {
+      return jsonResponse({ ok: true as const }, 200);
+    }
+
+    // POST /turn
+    if (method === "POST" && path === "/turn") {
+      try {
+        // Authenticate
+        const auth = await authenticator.authenticate(req);
+        if (!auth) {
+          return jsonResponse({ error: "unauthorized" }, 401);
+        }
+
+        // Parse JSON body
+        let body: unknown;
+        try {
+          body = await req.json();
+        } catch {
+          return jsonResponse({ error: "invalid JSON body" }, 400);
+        }
+
+        if (typeof body !== "object" || body === null) {
+          return jsonResponse({ error: "body must be a JSON object" }, 400);
+        }
+
+        const obj = body as Record<string, unknown>;
+        const input = obj.input;
+        if (typeof input !== "string" || input.trim().length === 0) {
+          return jsonResponse({ error: "input must be a non-empty string" }, 400);
+        }
+
+        // Get (or create) the agent for this vault
+        const agent = await registry.forVault(auth.vaultDid);
+
+        // Execute the turn
+        const result = await agent.turn(input);
+
+        // Build response: map AppendReceipt → {objectId, kind}
+        // AppendReceipt has object_id but NOT kind; the handler does not reach into
+        // the spine, so kind is set to "" (documented in NOTES).
+        const response: TurnResponse = {
+          reply: result.reply,
+          remembered: result.remembered.map((r) => ({
+            objectId: r.object_id,
+            kind: "",
+          })),
+        };
+
+        return jsonResponse(response, 200);
+      } catch {
+        // Any internal error → safe constant body
+        return new Response(SAFE_INTERNAL_ERROR_BODY, {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Everything else → 404
+    return jsonResponse({ error: "not found" }, 404);
+  };
 }

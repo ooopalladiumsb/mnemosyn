@@ -34,9 +34,9 @@ request/response. Wiring of each vault's spine/brain/embedder/keys is the inject
 |---|---|---|---|---|
 | **M0** | Ratify framing (web `fetch` handler core + Bun-bind adapter; auth/persistence deferred) | You | confirmed via "go D13" | ☑ |
 | **M1** | Contract: `docs/spec/d13-agent-server-v0.1-draft.md` + skeleton (`src/server/*`) + `docs/TASK-deepseek-D13.md` | Claude | skeleton typechecks; 246 green; committed | ☑ |
-| **M2** | Offline impl: handler (routes /health,/turn; 401/400/404/500), registry (get-or-create+cache), HeaderAuthenticator + node:test integration tests | DeepSeek | stubs replaced; NOTES written | ☐ |
-| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D13) · conformance 9/9 · vectors stay 5 · handler routes + auth + per-vault isolation + safe errors (no key/stack leak) · NOTES reviewed | ☐ |
-| **M4** | Commit + push offline | You ratify; Claude prepares | pushed | ☐ |
+| **M2** | Offline impl: handler (routes /health,/turn; 401/400/404/500), registry (get-or-create+cache), HeaderAuthenticator + node:test integration tests | DeepSeek | stubs replaced; NOTES written | ☑ |
+| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D13) · conformance 9/9 · vectors stay 5 · handler routes + auth + per-vault isolation + safe errors (no key/stack leak) · NOTES reviewed | ☑ PASS (262/262) |
+| **M4** | Commit + push offline | You ratify; Claude prepares | ☑ |
 | **M5** | **LIVE** smoke (service + real brain/embedder) | Operator + Claude | service started, one `POST /turn` returns a real reply + remembered memories recoverable; recorded `docs/notes/` | ☐ |
 | **M6** | Release `v1.3.0` (batched D12 + D12.2 + D13) | You | tag + GitHub Release | ☐ |
 
