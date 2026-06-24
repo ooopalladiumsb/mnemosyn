@@ -3,5 +3,6 @@
  * Embeddings/index are owner-private and NEVER anchored; the spine never imports this module.
  */
 export * from "./embedding.js";
+export * from "./openai-compat-embedder.js";
 export * from "./recall-index.js";
 export * from "./recall.js";
