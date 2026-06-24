@@ -5,5 +5,6 @@
  * lives here under `src/agent/` and depends only on the public spine surface (clean to extract).
  */
 export * from "./brain.js";
+export * from "./openai-compat-brain.js";
 export * from "./key-manager.js";
 export * from "./agent.js";
