@@ -2,6 +2,36 @@
 
 All notable changes to Mnemosyne are documented here.
 
+## v1.3.0 — 2026-06-24
+
+The agent comes alive and becomes callable: a **live LLM brain**, a **live semantic embedder**, and
+an **HTTP backend service**. Mnemosyne is no longer a library you wire by hand — it's a memory agent
+you can talk to over HTTP. 262 tests pass; each live seam smoke-tested against a real provider.
+
+### Added — D12 live Brain
+- `OpenAICompatBrain` — a real `Brain` over any OpenAI-compatible `/chat/completions` API
+  (`deepseekBrain` default = DeepSeek `deepseek-v4-flash`). Returns a structured `{reply, remember[]}`
+  with a mandatory safe fallback. Pure seam (no spine/keys), `apiKey` config-only, built-in `fetch`.
+  "Free now → premium later" (e.g. Anthropic) is a config swap. *Live-smoked.*
+
+### Added — D12.2 live Embedder
+- `OpenAICompatEmbedder` (+ `geminiEmbedder`/`jinaEmbedder`) — a real `EmbeddingProvider` over any
+  `/embeddings` API; validates dimension, throws `[EMBED_DIM_MISMATCH]`/`[EMBED_FAILED]` (apiKey-safe).
+  Lifts L2 recall from the non-semantic `HashEmbedder` to real semantic ranking. *Live-smoked with
+  Qwen `text-embedding-v3`: top-1 correct 3/3.*
+
+### Added — D13 agent backend
+- `createAgentHandler` — a framework-agnostic web `fetch` handler (`Request→Response`, Node 22 + Bun)
+  over a per-vault `AgentRegistry` + an `Authenticator` seam (`HeaderAuthenticator` for dev). Routes
+  `GET /health` + `POST /turn` with safe 401/400/404/500. `serveBun` deployment binding. Secrets live
+  in the injected agent factory; per-vault isolation. *Live HTTP smoke: real `POST /turn` over a
+  served endpoint → real LLM reply + recoverable memory.*
+
+### Notes
+No new runtime deps (`fetch` is built-in; `@ton/core` from v1.2.0 stays isolated). Real auth
+(Telegram initData / TON Connect, D14), a persistent store (D13.2), and the Telegram Mini App (D14)
+remain ahead.
+
 ## v1.2.0 — 2026-06-23
 
 Adds **real TON anchoring** (D11) — and the first live link between Mnemosyne and paradigm_terra. A

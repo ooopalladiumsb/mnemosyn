@@ -1,7 +1,7 @@
 {
   "name": "@mnemosyne/spine",
-  "version": "1.2.0",
-  "description": "Mnemosyne — deterministic, verifiable, sovereign memory for AI agents (L0 spine · L1 anchor · L2 recall · L3 semantic · L4 collective · L5 fabric · D10 agent host · D11 TON anchor).",
+  "version": "1.3.0",
+  "description": "Mnemosyne — deterministic, verifiable, sovereign memory for AI agents (L0–L5 + agent host + TON anchor + live LLM brain/embedder + HTTP backend).",
   "type": "module",
   "license": "MIT",
   "engines": {
