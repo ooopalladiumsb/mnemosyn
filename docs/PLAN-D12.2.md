@@ -32,9 +32,9 @@ D14 TMA. "Free now → premium later" is a config swap (same seam as the Brain).
 |---|---|---|---|---|
 | **M0** | Ratify framing (provider-agnostic `OpenAICompatEmbedder`; throw on failure; validate dimension; provider/key picked at M5) | You | confirmed via "D12.2" | ☑ |
 | **M1** | Contract: `docs/spec/d12.2-live-embedder-v0.1-draft.md` + skeleton (`src/recall/openai-compat-embedder.ts`) + `docs/TASK-deepseek-D12.2.md` | Claude | skeleton typechecks; 228 green; committed | ☑ |
-| **M2** | Offline impl: `embed` (POST + parse + dimension/​error handling) + injected-fetch tests | DeepSeek | stubs replaced; NOTES written | ☐ |
-| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D12.2) · conformance 9/9 · vectors stay 5 · embedder out-of-root (imports only `./embedding.js`) · apiKey-safe · NOTES reviewed | ☐ |
-| **M4** | Commit + push offline | You ratify; Claude prepares | pushed | ☐ |
+| **M2** | Offline impl: `embed` (POST + parse + dimension/​error handling) + injected-fetch tests | DeepSeek | stubs replaced; NOTES written | ☑ |
+| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D12.2) · conformance 9/9 · vectors stay 5 · embedder out-of-root (imports only `./embedding.js`) · apiKey-safe · NOTES reviewed | ☑ PASS (246/246) |
+| **M4** | Commit + push offline | You ratify; Claude prepares | ☑ |
 | **M5** | **LIVE** smoke (operator's embeddings key) | Operator + Claude | one real `embed()` + a recall over a few memories returns the semantically-right one; recorded `docs/notes/` | ☐ |
 
 Release (v1.3.0) deferred — batch with D13.

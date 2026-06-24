@@ -37,9 +37,61 @@ export class OpenAICompatEmbedder implements EmbeddingProvider {
     this.dimension = config.dimension;
   }
 
-  async embed(_text: string): Promise<Embedding> {
-    void this.config; // body (TASK-deepseek-D12.2) reads config (baseURL/model/apiKey/fetchImpl)
-    throw new Error("[TODO_D12_2] OpenAICompatEmbedder.embed not implemented");
+  async embed(text: string): Promise<Embedding> {
+    const fetchFn = this.config.fetchImpl ?? fetch;
+
+    let response: Response;
+    try {
+      response = await fetchFn(`${this.config.baseURL}/embeddings`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.config.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ model: this.config.model, input: text }),
+      });
+    } catch {
+      throw new Error("[EMBED_FAILED] network error — could not reach the embeddings API");
+    }
+
+    if (!response.ok) {
+      let snippet = "";
+      try {
+        snippet = (await response.text()).slice(0, 200);
+      } catch {
+        // ignore
+      }
+      throw new Error(
+        `[EMBED_FAILED] API returned ${response.status}${snippet ? ": " + snippet : ""}`,
+      );
+    }
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      throw new Error("[EMBED_FAILED] non-JSON response from embeddings API");
+    }
+
+    const obj = body as Record<string, unknown>;
+    const data = obj.data;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("[EMBED_FAILED] empty or missing data array in embeddings response");
+    }
+
+    const first = data[0] as Record<string, unknown> | undefined;
+    if (!first || !Array.isArray(first.embedding)) {
+      throw new Error("[EMBED_FAILED] missing or non-array embedding in response");
+    }
+
+    const vec = Float32Array.from(first.embedding as number[]);
+    if (vec.length !== this.dimension) {
+      throw new Error(
+        `[EMBED_DIM_MISMATCH] expected dimension ${this.dimension}, got ${vec.length}`,
+      );
+    }
+
+    return vec;
   }
 }
 
