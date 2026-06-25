@@ -24,9 +24,9 @@ into the agent backend is deployment (D14).
 |---|---|---|---|---|
 | **M0** | Ratify (file-backed `FileSpineStore`; faithful round-trip; hex-encoded keys) | You | confirmed via "D13.2" | ☑ |
 | **M1** | Contract: `docs/spec/d13.2-persistent-store-v0.1-draft.md` + skeleton (`src/spine/file-store.ts`) + `docs/TASK-deepseek-D13.2.md` | Claude | skeleton typechecks; 262 green; committed | ☑ |
-| **M2** | Offline impl: `FileSpineStore` (put/get/spaceCount/spaceHeadHash/listSpaces over `node:fs`) + tests | DeepSeek | stubs replaced; NOTES written | ☐ |
-| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D13.2) · conformance 9/9 · vectors stay 5 · **MemSpineStore-equivalence** (same `vault_memory_root`) · **restart** (fresh instance recovers) · NOTES reviewed | ☐ |
-| **M4** | Commit + push | You ratify; Claude prepares | pushed | ☐ |
+| **M2** | Offline impl: `FileSpineStore` (put/get/spaceCount/spaceHeadHash/listSpaces over `node:fs`) + tests | DeepSeek | stubs replaced; NOTES written | ☑ |
+| **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D13.2) · conformance 9/9 · vectors stay 5 · **MemSpineStore-equivalence** (same `vault_memory_root`) · **restart** (fresh instance recovers) · NOTES reviewed | ☑ PASS (275/275) |
+| **M4** | Commit + push | You ratify; Claude prepares | ☑ |
 
 No live step, no release (fold into the next release with D14, or a patch v1.3.1 — your call later).
 
