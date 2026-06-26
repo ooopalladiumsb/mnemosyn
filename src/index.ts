@@ -14,6 +14,7 @@
  *   - agent:     D10 agent host — Brain seam · VaultKeyManager · MnemosyneAgent loop (@mnemosyne/agent)
  *   - anchorTon: D11 real TON anchoring via terra's anchor-body transport (needs @ton/core)
  *   - server:    D13 agent backend — a web fetch handler over the agent (per-vault, authenticated)
+ *   - telegram:  D14 Telegram Mini App auth — initData validation → per-user vault (D13 seam)
  */
 export * as canonical from "./canonical/index.js";
 export * from "./spine/index.js";
@@ -27,3 +28,4 @@ export * as fabric from "./fabric/index.js";
 export * as agent from "./agent/index.js";
 export * as anchorTon from "./anchor-ton/index.js";
 export * as server from "./server/index.js";
+export * as telegram from "./telegram/index.js";

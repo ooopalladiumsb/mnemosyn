@@ -29,13 +29,23 @@ DeepSeek does the code; **you** do the deployment (as you did the M5 broadcasts)
   chat UI; Telegram WebApp SDK; calls `POST /turn` with the initData header).
 - **OPERATOR / live** (you): bot token, public HTTPS, @BotFather Mini-App URL, the in-Telegram chat.
 
+### Deployment architecture (GitHub Pages = static)
+Known: bot **@MnemoVaultBot**; frontend host **https://ooopalladiumsb.github.io/mnemosyn/** (GitHub
+Pages, the `mnemosyn` repo). GitHub Pages is **static (HTML/JS only)** → it hosts the **frontend**, but
+the **backend** (`POST /turn`, Telegram auth, brain/embedder/spine) CANNOT run there. So:
+- **Frontend** (static) → GitHub Pages. Built into `app/`; the operator publishes it to the Pages
+  source. It reads a configurable `BACKEND_URL` and calls `${BACKEND_URL}/turn` with the initData header.
+- **Backend** (dynamic) → a SEPARATE public HTTPS host (operator's cloudflared tunnel / VPS, M5). The
+  frontend calls it CROSS-ORIGIN → the backend handler is **CORS-wrapped** (`withCors`) for the Pages
+  origin (`https://ooopalladiumsb.github.io`).
+
 ---
 
 ## Milestones (track here)
 | # | Milestone | Owner | Gate / Done-when | Status |
 |---|---|---|---|---|
 | **M0** | Ratify framing (vault identity: Telegram-id vs TON-Connect wallet; MVP scope) | You | RATIFIED: Telegram-id (HMAC), TON Connect = D14.2 | ☑ |
-| **M1** | Contract: `docs/spec/d14-telegram-miniapp-v0.1-draft.md` + skeleton (`src/telegram/*` + `app/` frontend stub) + `docs/TASK-deepseek-D14.md` | Claude | skeleton typechecks; 275 green; committed | ☐ |
+| **M1** | Contract: `docs/spec/d14-telegram-miniapp-v0.1-draft.md` + skeleton (`src/telegram/*` + `app/` frontend stub) + `docs/TASK-deepseek-D14.md` | Claude | skeleton typechecks; 275 green; committed | ☑ |
 | **M2** | Offline impl: `TelegramInitDataAuthenticator` + tests; bot/webhook handler; Mini-App frontend; deployment wiring | DeepSeek | stubs replaced; NOTES; local serve smoke green | ☐ |
 | **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D14 auth tests) · conformance 9/9 · vectors stay 5 · initData-validation correctness (valid passes, tampered/expired/wrong-bot rejected) · no bot-token leak · local serve smoke (`/turn` through Telegram auth) · NOTES reviewed | ☐ |
 | **M4** | Commit + push offline | You ratify; Claude prepares | pushed | ☐ |

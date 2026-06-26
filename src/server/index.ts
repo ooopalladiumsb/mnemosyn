@@ -4,4 +4,5 @@
  * (D14) calls this. Secrets/keys live in the injected agent factory, never in a response.
  */
 export * from "./handler.js";
+export * from "./cors.js";
 export * from "./serve-bun.js";
