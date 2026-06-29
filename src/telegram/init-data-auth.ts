@@ -15,8 +15,10 @@
  * ARCHITECT-OWNED CONTRACT. The config/class + the exported function SIGNATURES are FROZEN; DeepSeek
  * implements the bodies (docs/TASK-deepseek-D14.md). New helpers OK.
  */
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { Authenticator } from "../server/handler.js";
 import type { VaultDid } from "../spine/types.js";
+import { vaultDidFromPubkey } from "../identity/did.js";
 
 /** Wiring for Telegram initData auth. `botToken`/`vaultSecret` are secrets — server-side only. */
 export interface TelegramAuthConfig {
@@ -42,24 +44,100 @@ export interface VerifiedInitData {
  * older than `maxAgeSeconds`. Never throws on bad input; never leaks the token.
  */
 export function verifyInitData(
-  _initData: string,
-  _botToken: string,
-  _opts?: { maxAgeSeconds?: number; nowSeconds?: number },
+  initData: string,
+  botToken: string,
+  opts?: { maxAgeSeconds?: number; nowSeconds?: number },
 ): VerifiedInitData | null {
-  throw new Error("[TODO_D14] verifyInitData not implemented");
+  // Parse initData as query string
+  let params: URLSearchParams;
+  try {
+    params = new URLSearchParams(initData);
+  } catch {
+    return null;
+  }
+
+  // Must have a hash field
+  const hash = params.get("hash");
+  if (!hash) return null;
+
+  // Remove hash from the data_check_string
+  params.delete("hash");
+
+  // Sort remaining keys and build data_check_string
+  const sortedKeys = [...params.keys()].sort();
+  const dataCheckParts: string[] = [];
+  for (const key of sortedKeys) {
+    dataCheckParts.push(`${key}=${params.get(key)!}`);
+  }
+  const dataCheckString = dataCheckParts.join("\n");
+
+  // Compute the secret key: HMAC_SHA256(key="WebAppData", data=botToken)
+  const secretHmac = createHmac("sha256", "WebAppData");
+  secretHmac.update(botToken);
+  const secret = secretHmac.digest();
+
+  // Compute the expected hash: HMAC_SHA256(key=secret, data=data_check_string)
+  const hashHmac = createHmac("sha256", secret);
+  hashHmac.update(dataCheckString);
+  const computedHash = Buffer.from(hashHmac.digest()).toString("hex");
+
+  // Constant-time comparison. timingSafeEqual throws on length mismatch, so guard length first
+  // (a wrong-length hash is a reject anyway).
+  const hashBuf = Buffer.from(hash, "hex");
+  const computedBuf = Buffer.from(computedHash, "hex");
+  if (hashBuf.length !== computedBuf.length) return null;
+  if (!timingSafeEqual(hashBuf, computedBuf)) return null;
+
+  // Must have user field with valid JSON containing id
+  const userRaw = params.get("user");
+  if (!userRaw) return null;
+  let userObj: unknown;
+  try {
+    userObj = JSON.parse(userRaw);
+  } catch {
+    return null;
+  }
+  if (typeof userObj !== "object" || userObj === null) return null;
+  const userId = (userObj as Record<string, unknown>).id;
+  if (typeof userId !== "number" || !Number.isInteger(userId)) return null;
+
+  // Check auth_date freshness
+  const authDateRaw = params.get("auth_date");
+  if (authDateRaw) {
+    const maxAge = opts?.maxAgeSeconds ?? 86400;
+    const now = opts?.nowSeconds ?? Math.floor(Date.now() / 1000);
+    const authDate = parseInt(authDateRaw, 10);
+    if (!Number.isInteger(authDate)) return null;
+    if (now - authDate > maxAge) return null;
+  }
+
+  return { userId: String(userId), params };
 }
 
 /** Derive a stable Vault DID from a Telegram user id + a server secret (HMAC → pubkey → DID). */
-export function vaultDidForTelegramUser(_userId: string, _vaultSecret: Uint8Array): VaultDid {
-  throw new Error("[TODO_D14] vaultDidForTelegramUser not implemented");
+export function vaultDidForTelegramUser(userId: string, vaultSecret: Uint8Array): VaultDid {
+  const hmac = createHmac("sha256", vaultSecret);
+  hmac.update("tg:" + userId);
+  const digest = new Uint8Array(hmac.digest());
+  return vaultDidFromPubkey(digest);
 }
 
 /** An `Authenticator` (D13 seam) backed by Telegram WebApp initData → a per-Telegram-user vault. */
 export class TelegramInitDataAuthenticator implements Authenticator {
   constructor(private readonly config: TelegramAuthConfig) {}
 
-  async authenticate(_req: Request): Promise<{ vaultDid: VaultDid } | null> {
-    void this.config; // body reads botToken/vaultSecret/headerName/maxAge (TASK-deepseek-D14)
-    throw new Error("[TODO_D14] TelegramInitDataAuthenticator.authenticate not implemented");
+  async authenticate(req: Request): Promise<{ vaultDid: VaultDid } | null> {
+    const headerName = this.config.headerName ?? "x-telegram-init-data";
+    const initData = req.headers.get(headerName);
+    if (!initData) return null;
+
+    const verified = verifyInitData(initData, this.config.botToken, {
+      maxAgeSeconds: this.config.maxAgeSeconds,
+      nowSeconds: this.config.nowSeconds ? this.config.nowSeconds() : undefined,
+    });
+    if (!verified) return null;
+
+    const vaultDid = vaultDidForTelegramUser(verified.userId, this.config.vaultSecret);
+    return { vaultDid };
   }
 }

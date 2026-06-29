@@ -18,14 +18,58 @@ export interface CorsOptions {
   readonly methods?: readonly string[];
 }
 
+/** Check if an origin is allowed under the CORS policy. */
+function originAllowed(origin: string | null, origins: readonly string[] | "*"): boolean {
+  if (!origin) return false;
+  if (origins === "*") return true;
+  return origins.includes(origin);
+}
+
 /**
  * Wrap a handler with CORS: answer `OPTIONS` preflight with a 204 + the allow headers; on other
  * requests, add `Access-Control-Allow-Origin` (echoing an allowed `Origin`, or `*`) to the response.
  * An `Origin` not in `origins` is NOT granted CORS headers (the browser then blocks it).
  */
 export function withCors(
-  _handler: (req: Request) => Promise<Response>,
-  _opts: CorsOptions,
+  handler: (req: Request) => Promise<Response>,
+  opts: CorsOptions,
 ): (req: Request) => Promise<Response> {
-  throw new Error("[TODO_D14] withCors not implemented");
+  const methods = opts.methods ?? ["GET", "POST", "OPTIONS"];
+  const headers = opts.headers ?? ["content-type", "x-telegram-init-data"];
+  const allowMethods = methods.join(", ");
+  const allowHeaders = headers.join(", ");
+
+  return async (req: Request): Promise<Response> => {
+    const origin = req.headers.get("origin");
+    const allowed = originAllowed(origin, opts.origins);
+
+    // Handle preflight
+    if (req.method === "OPTIONS") {
+      const res = new Response(null, { status: 204 });
+      if (allowed && origin) {
+        res.headers.set("Access-Control-Allow-Origin", opts.origins === "*" ? "*" : origin);
+      }
+      res.headers.set("Access-Control-Allow-Methods", allowMethods);
+      res.headers.set("Access-Control-Allow-Headers", allowHeaders);
+      res.headers.set("Access-Control-Max-Age", "86400");
+      return res;
+    }
+
+    // Normal request — delegate to wrapped handler
+    const res = await handler(req);
+
+    // Add CORS header if origin is allowed
+    if (allowed && origin) {
+      // Clone the response to add headers (Response is immutable after creation)
+      const corsRes = new Response(res.body, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: res.headers,
+      });
+      corsRes.headers.set("Access-Control-Allow-Origin", opts.origins === "*" ? "*" : origin);
+      return corsRes;
+    }
+
+    return res;
+  };
 }
