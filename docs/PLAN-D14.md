@@ -48,7 +48,7 @@ the **backend** (`POST /turn`, Telegram auth, brain/embedder/spine) CANNOT run t
 | **M1** | Contract: `docs/spec/d14-telegram-miniapp-v0.1-draft.md` + skeleton (`src/telegram/*` + `app/` frontend stub) + `docs/TASK-deepseek-D14.md` | Claude | skeleton typechecks; 275 green; committed | ☑ |
 | **M2** | Offline impl: `TelegramInitDataAuthenticator` + tests; bot/webhook handler; Mini-App frontend; deployment wiring | DeepSeek | stubs replaced; NOTES; local serve smoke green | ☑ |
 | **M3** | Acceptance | Claude | typecheck ✓ · `npm test` green (+D14 auth tests) · conformance 9/9 · vectors stay 5 · initData-validation correctness (valid passes, tampered/expired/wrong-bot rejected) · no bot-token leak · local serve smoke (`/turn` through Telegram auth + CORS) · NOTES reviewed | ☑ PASS (304/304; serve smoke: /health 200, preflight 204, unauth /turn 401) |
-| **M4** | Commit + push offline | You ratify; Claude prepares | pushed | ☐ |
+| **M4** | Commit + push offline | You ratify; Claude prepares | pushed | ☑ (commit `3e01dd4`, pushed to origin/main 2026-06-29) |
 | **M5** | **OPERATOR** deploy | You | @BotFather bot token; public HTTPS host (tunnel/VPS); Mini-App URL registered; webhook set | ☐ |
 | **M6** | **LIVE** Telegram test | You + Claude | open the Mini App in Telegram → chat → real reply → memory persists across restart (D13.2); (TON Connect if in scope) → recorded `docs/notes/` | ☐ |
 | **M7** | Release `v1.4.0` (D13.2 + D14) | You | tag + GitHub Release | ☐ |
